@@ -1,4 +1,4 @@
-{ name = "halogen-project"
+{ name = "purely-planning"
 , dependencies =
   [ "aff"
   , "arrays"
@@ -21,6 +21,7 @@
   , "tuples"
   , "typelevel-prelude"
   , "uri"
+  , "web-dom"
   , "web-html"
   ]
 , packages = ./packages.dhall
