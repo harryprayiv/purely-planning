@@ -112,7 +112,7 @@ button {
 }
 
 .button__navigate {
-  background-color: #2196f3;
+  background-color: #5e95c2;
   border: none;
   color: white;
   padding: 8px 16px;
@@ -124,7 +124,7 @@ button {
 }
 
 .button__reset {
-  background-color: #f44336;
+  background-color: #e87e0e;
   border: none;
   color: white;
   padding: 8px 16px;
@@ -135,7 +135,7 @@ button {
 }
 
 .button__export {
-  background-color: #2196f3;
+  background-color: #1984db;
   border: none;
   color: white;
   padding: 8px 16px;
