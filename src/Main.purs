@@ -26,7 +26,7 @@ main ∷ Effect Unit
 main = do
   dt ← nowDateTime
   HA.runHalogenAff do
-    liftEffect (window >>= document >>= setTitle "Wilma's scheduler")
+    liftEffect (window >>= document >>= setTitle "IATSE 481 Availability List")
     _ ← runUI component dt =<< awaitBody
     runUI faviconComponent unit =<< awaitHead
 
