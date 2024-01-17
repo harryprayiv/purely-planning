@@ -11,7 +11,7 @@
     utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ]
       (system:
         let
-          name = "Availability List";
+          name = "481 Availability List";
           pkgs = nixpkgs.legacyPackages.${system};
           ps-tools = inputs.ps-tools.legacyPackages.${system};
           purs-nix = inputs.purs-nix { inherit system; };
@@ -84,8 +84,13 @@
           };
         in
         {
-          packages.default = ps.modules.Main.bundle { };
-
+          # packages.default = ps.modules.Main.bundle { };
+          packages = with ps; {
+            default = ps.modules.Main.bundle {};
+            bundle = bundle {};
+            output = output {};
+          };
+          bundle.esbuild = {format = "iife";};
           # checks.default = checks;
 
           devShells.default =
