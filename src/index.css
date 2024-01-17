@@ -6,7 +6,9 @@ body {
 }
 
 body {
-  font-family: SvenskForm-Regular;
+  font-family: 'SvenskForm-Regular', sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
 }
 
 button {
@@ -19,13 +21,19 @@ button {
   height: 100%;
   width: 100%;
   justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-@media screen and (max-width: 768px) {
-  .app {
-    flex-direction: column;
-    align-items: center;
-  }
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 .calendar {
@@ -44,31 +52,65 @@ button {
   overflow: hidden;
 }
 
-.calendar-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
 .calendar__day {
   border: 1px solid lightgray;
   vertical-align: top;
   font-size: 0.8rem;
+  padding: 10px;
+  background-color: #fff;
+  transition: background-color 0.3s;
 }
 
 .calendar__day--empty {
   border: none;
+  background-color: transparent;
 }
 
 .calendar__day--picked {
   position: relative;
   background-color: rgba(255, 0, 0, 0.3);
-  width: 50%;
-  left: 25%;
-  text-align: center;
+  text-align: left;
+  padding: 5px;
   border-radius: 10px;
 }
+
+.calendar__day--picked .calendar__day-checkmark {
+  display: block; /* Show checkmark when day is picked */
+  color: green;
+  font-size: 1.2em;
+  background-color: transparent;
+}
+
+.calendar__day--available {
+  position: relative;
+  background-color: white;
+  /* Other styles... */
+}
+
+.calendar__day-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar__day-date {
+  /* Styles for the date text */
+}
+
+/* .calendar__day-checkmark {
+  color: rgb(193, 210, 8); 
+  font-size: 1.2em;
+} */
+
+.calendar__day--picked::after {
+  content: '✓';
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  font-size: 1.2em;
+  color: green;
+}
+
 .calendar__day--picked--spans {
   text-align: center;
   position: relative;
@@ -79,33 +121,28 @@ button {
 }
 
 .calendar__day:hover {
-  background-color: lightblue;
-  cursor: pointer;
-}
-
-.calendar__head:nth-child(n + 7) {
-  color: red;
+  background-color: rgba(0, 0, 0, 0.723);
 }
 
 .calendar__head {
   width: 3rem;
   height: 3rem;
   text-align: center;
+  background-color: #e6e6e6;
+  font-weight: bold;
+}
+
+.calendar__head:nth-child(n + 7) {
+  color: rgb(198, 123, 123);
 }
 
 .calendar__controls_wrapper {
   display: flex;
   justify-content: center;
   width: 100%;
+  padding: 10px;
 }
 
-.calendar__controls {
-  display: flex;
-  width: 50%;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-}
 
 .calendar__r {
   width: 100%;
@@ -157,7 +194,7 @@ button {
   gap: 20px;
 }
 
-.shift-form {
+.availability-form {
   display: flex;
   justify-content: center;
   height: 100%;
@@ -165,7 +202,7 @@ button {
   padding: 10px;
 }
 
-.shifts {
+.options {
   display: flex;
   flex-direction: column;
   gap: 10px;

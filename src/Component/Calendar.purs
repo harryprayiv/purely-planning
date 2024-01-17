@@ -2,20 +2,20 @@ module Calendar where
 
 import Prelude
 
-import Data.Array (cons, filter, last, length, mapMaybe, mapWithIndex, replicate, singleton, splitAt)
 import Data.Date (Date, Month(..), Weekday(..), month, weekday, year)
 import Data.Date as Date
-import Data.DateTime (DateTime, date, hour)
+import Data.DateTime (DateTime, date)
 import Data.DateTime as Time
-import Data.Enum (enumFromTo, fromEnum, pred, succ)
-import Data.Map.Internal as Map
-import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Types (Hours(..), Shift(..), Workdays)
+import Data.Array (cons, filter, last, length, mapMaybe, mapWithIndex, replicate, singleton, splitAt)
+import Data.Enum (enumFromTo, fromEnum, pred, succ)
+import Data.Map.Internal (empty, lookup) as Map
+import Data.Maybe (Maybe(..), fromMaybe)
 import Utils (css)
+import Types (Availability)
 
 type Matrix a = Array (Array a)
 
@@ -24,11 +24,11 @@ data Padded a = Padding | Data a
 weekdays ∷ Array Date.Weekday
 weekdays = enumFromTo bottom top
 
-type Input = { workdays ∷ Workdays, now ∷ DateTime }
+type Input = { availability ∷ Availability, now ∷ DateTime }
 
 data Action = Next | Previous | Pick Date | Receive Input
 
-type State = { currentDate ∷ Date, time ∷ Time.Time, workdays ∷ Workdays }
+type State = { currentDate ∷ Date, time ∷ Time.Time, availability ∷ Availability }
 
 type Output = Date
 
@@ -47,7 +47,7 @@ initialState ∷ Input → State
 initialState input =
   { currentDate: (date input.now)
   , time: (Time.time input.now)
-  , workdays: Map.empty
+  , availability: Map.empty
   }
 
 render ∷ ∀ m. State → H.ComponentHTML Action () m
@@ -74,39 +74,34 @@ render state =
     ]
   where
   tableBody ∷ ∀ w. HH.HTML w Action
-  tableBody = HH.tbody [ css "calendar__body" ] (map (HH.tr [ css "calendar__row" ]) (dayMatrix state.currentDate state.workdays))
+  tableBody = HH.tbody [ css "calendar__body" ] (map (HH.tr [ css "calendar__row" ]) (dayMatrix state.currentDate state.availability))
 
 tableHeads ∷ ∀ w. Array (HH.HTML w Action)
 tableHeads = cons (th []) $ map (th <<< singleton <<< HH.text) (map (String.take 3 <<< show) weekdays)
   where
   th = HH.th [ css "calendar__head" ]
 
-dataRow ∷ ∀ w. Date → Workdays → Array (HH.HTML w Action)
+dataRow ∷ ∀ w. Date → Availability → Array (HH.HTML w Action)
 dataRow d ws = datesOfMonth d >>= Data >>> dataCell ws >>> pure
 
-dataCell ∷ ∀ w. Workdays → Padded Date → HH.HTML w Action
-dataCell ws pd =
+dataCell ∷ ∀ w. Availability → Padded Date → HH.HTML w Action
+dataCell availability pd =
   case pd of
     Data d →
-      case (Map.lookup d ws) of
-        Just sh → pickedCell d sh
-
-        Nothing → cell d
-
+      case (Map.lookup d availability) of
+        Just true → availableCell d
+        _ → cell d
     Padding → HH.td [ css "calendar__day--empty" ] []
 
   where
-  pickedCell ∷ Date → Array Shift → HH.HTML w Action
-  pickedCell d ss = HH.td [ css "calendar__day", HE.onClick \_ → Pick d ]
-    [ HH.div [ css "flex-c" ] $
-        [ HH.text $ show (fromEnum $ Date.day d) ] <>
-          ( ss <#>
-              \(Shift s) →
-                if spansTwoDays s.hours then
-                  HH.span [ css "calendar__day--picked--spans" ] [ HH.text (String.take 1 s.label) ]
-                else
-                  HH.span [ css "calendar__day--picked" ] [ HH.text (String.take 1 s.label) ]
-          )
+  availableCell ∷ Date → HH.HTML w Action
+  availableCell d = HH.td [ css "calendar__day--available", HE.onClick \_ → Pick d ]
+    [ HH.div [ css "calendar__day-content" ]
+        [ HH.span [ css "calendar__day-date" ]
+            [ HH.text $ show (fromEnum $ Date.day d) ]
+        , HH.span [ css "calendar__day-checkmark" ]
+            [ HH.text "✓" ]
+        ]
     ]
 
   cell ∷ Date → HH.HTML w Action
@@ -115,10 +110,7 @@ dataCell ws pd =
         [ HH.text $ show (fromEnum $ Date.day d) ]
     ]
 
-  spansTwoDays ∷ Hours → Boolean
-  spansTwoDays (Hours { from: t1, to: t2 }) = hour t2 < hour t1
-
-dayMatrix ∷ ∀ w. Date → Workdays → Matrix (HH.HTML w Action)
+dayMatrix ∷ ∀ w. Date → Availability → Matrix (HH.HTML w Action)
 dayMatrix date ws = mapWithIndex addWeek (chunks (length weekdays) paddedDays)
   where
   addWeek ∷ Int → Array (HH.HTML w Action) → Array (HH.HTML w Action)
@@ -200,7 +192,7 @@ handleAction = case _ of
   Pick d → do
     H.raise d
   Receive i → do
-    H.modify_ _ { workdays = i.workdays }
+    H.modify_ _ { availability = i.availability }
 
 week ∷ Date → Int
 week d = if nbrMondaysUpUntilDate == 0 then week lastDateOfLastYear else nbrMondaysUpUntilDate
